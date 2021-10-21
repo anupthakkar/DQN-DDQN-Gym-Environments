@@ -20,6 +20,23 @@ class ReplayMemory:
     
     def store_experience(self, experience):
         self.experience[self.pointer] = experience
+        if self.pointer + 1 >= self.size:
+            self.pointer = 0
+        else:
+            self.pointer += 1
+        return
         
     def sample(self, batch):
-        indexes = random.sample(self.experience, batch)
+        indexes = random.sample(range(self.size), batch)
+        res = [val for i, val in enumerate(self.experience) if i in indexes]
+        current_states = []
+        actions = []
+        rewards = []
+        next_states = []
+        for exp in res:
+            current_states.append(torch.tensor(exp[0]))
+            actions.append(torch.tensor(exp[1]))
+            rewards.append(torch.tensor(exp[2]))
+            next_states.append(torch.tensor(exp[3]))
+        
+        return current_states, actions, rewards, next_states
