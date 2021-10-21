@@ -35,6 +35,9 @@ class Net(nn.Module):
     def load_model(self,filename='models/temporary_model.pth'):
         self.load_state_dict(torch.load(filename))
 
+    def transfer_weights(self,model):
+        self.load_state_dict(model.state_dict())
+
 # Testing the file functions
 # input1 = np.zeros(25)
 # input1[2] = 1
