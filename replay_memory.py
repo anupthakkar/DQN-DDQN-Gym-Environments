@@ -27,8 +27,11 @@ class ReplayMemory:
         return
         
     def sample(self, exp_batch):
-        indexes = random.sample(range(self.size), exp_batch)
-        res = [val for i, val in enumerate(self.experience) if i in indexes]
+        if(len(self.experience) <= exp_batch):
+            res = [val for i, val in enumerate(self.experience) if i in range(len(self.experience))]
+        else:
+            indexes = random.sample(range(len(self.experience)), exp_batch)
+            res = [val for i, val in enumerate(self.experience) if i in indexes]
         current_states = []
         actions = []
         rewards = []
