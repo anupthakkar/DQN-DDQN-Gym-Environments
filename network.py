@@ -23,6 +23,7 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, 10)
         # comment 1
         # comment 2
+        # comment 3
         
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
