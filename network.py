@@ -1,37 +1,51 @@
 import numpy as np
-import gym
-from gym import spaces
 import matplotlib.pyplot as plt
-import random
-from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from operator import add
-import math
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-import torch.optim as optim
-plt.rcParams["figure.figsize"] = (20,15)
 
 class Net(nn.Module):
-    def __init__(self):
-        super().__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
-        # comment 1
-        # comment 2
-        # comment 3
-        # comment 4
-        # comment 5
-        
-    def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = torch.flatten(x, 1) # flatten all dimensions except batch
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
-        return x
+    def __init__(self, input_size=25, output_size=4,lr=1e-3):
+        super(Net, self).__init__()
+
+        # the architecture of the model is 
+        # 25 * 64 * 128 * 256 * 4
+        self.linear_batchnorm_relu_stack = nn.Sequential(
+            nn.Linear(input_size, 64, bias=True,),
+            # nn.BatchNorm1d((64,1)),
+            nn.ReLU(),
+            nn.Linear(64, 128, bias=True),
+            # nn.BatchNorm1d((128,1)),
+            nn.ReLU(),
+            nn.Linear(128, 256, bias=True),
+            # nn.BatchNorm1d((128,1)),
+            nn.ReLU(),
+            nn.Linear(256, output_size, bias=True),
+            nn.ReLU()
+        )
+
+    def predict(self, x):
+        # x = torch.flatten(x)
+        output = self.linear_batchnorm_relu_stack(x)
+        return nn.Softmax(output)
+    
+    def save_model(self,filename='models/temporary_model.pth'):
+        torch.save(self.state_dict(), filename)
+
+    def load_model(self,filename='models/temporary_model.pth'):
+        self.load_state_dict(torch.load(filename))
+
+# Testing the file functions
+# input1 = np.zeros(25)
+# input1[2] = 1
+# final_input = torch.from_numpy(input1).float()
+# model = Net()
+# print(final_input)
+# print(model.predict(final_input))
+# model.save_model()
+# print(model)
+# print('model1')
+# model2 = Net()
+# model2.load_model()
+# print(model2)
+# print('model2')
