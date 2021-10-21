@@ -26,8 +26,8 @@ class ReplayMemory:
             self.pointer += 1
         return
         
-    def sample(self, batch):
-        indexes = random.sample(range(self.size), batch)
+    def sample(self, exp_batch):
+        indexes = random.sample(range(self.size), exp_batch)
         res = [val for i, val in enumerate(self.experience) if i in indexes]
         current_states = []
         actions = []
