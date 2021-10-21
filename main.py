@@ -25,6 +25,7 @@ class Main:
         self.neural_net = Net()
         self.learning_target = Net()
         self.memory = ReplayMemory(1000)
+        self.batch_size = 4
 
     def select_action(self, observation):
         if np.random.random() < self.epsilon:
@@ -40,13 +41,15 @@ class Main:
             current_state = self.env.reset()
             action = self.select_action(current_state)
             observation, current_reward, done, info = self.env.step(action)
-            self.memory.store_experience(current_state, action, current_reward, observation)
+            self.memory.store_experience([current_state, action, current_reward, observation, done])
             current_state = observation
             while not done:
                 action = self.select_action(current_state)
                 observation, current_reward, done, info = self.env.step(action)
-                self.memory.store_experience(current_state, action, current_reward, observation)
+                self.memory.store_experience([current_state, action, current_reward, observation, done])
                 current_state = observation
+                current_states, actions, rewards, next_states, dones = self.memory.sample(self.batch_size)
+                self.train(current_states, actions, rewards, next_states, dones)
 
 
 

@@ -36,10 +36,12 @@ class ReplayMemory:
         actions = []
         rewards = []
         next_states = []
+        dones = []
         for exp in res:
             current_states.append(torch.tensor(exp[0]))
             actions.append(torch.tensor(exp[1]))
             rewards.append(torch.tensor(exp[2]))
             next_states.append(torch.tensor(exp[3]))
+            dones.append(torch.tensor(exp[4]))
         
-        return current_states, actions, rewards, next_states
+        return current_states, actions, rewards, next_states, dones
