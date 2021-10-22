@@ -17,8 +17,8 @@ class GridEnvironment(gym.Env):
     def __init__(self, type):                     #type variable defines the environment type ie deterministic or stochastic
         self.observation_space = spaces.Discrete(25)
         self.action_space = spaces.Discrete(4)
-        self.max_timesteps = 50
-        self.reward_action_step = -0.5          #reward associated with each timestep
+        self.max_timesteps = 25
+        self.reward_action_step = -0.5         #reward associated with each timestep
         self.outbound_reward = -1             #each time the agent tries to go out of the environment it gets negative reward
         self.env_type = type
         print('***************{}***************'.format(self.env_type+' environment'))
@@ -35,11 +35,12 @@ class GridEnvironment(gym.Env):
         self.monster_pos = [2,3]
         self.pit_pos = [3,1]
         self.state = np.zeros((5, 5))
-        observation = self.state.flatten()
         
+        self.state[tuple(self.agent_pos)] = 1
+        observation = self.state.flatten()
         self.reward_dict = {                         #dict to store the values of rewards
             'intermediate_goal1': 2,
-            'intermediate_goal2': 5,
+            'intermediate_goal2': 0.5,
             'intermediate_goal3': 2,
             'final_goal': 25,
             'monster': -10,
@@ -65,29 +66,35 @@ class GridEnvironment(gym.Env):
         if(self.env_type == 'stochastic'):
             if(action == 0):
                 action = np.random.choice(4, 1, p=[0.95, 0.03, 0.01, 0.01])[0]
+            
             elif(action == 1):
                 action = np.random.choice(4, 1, p=[0.03, 0.95, 0.01, 0.01])[0]
+            
             elif(action == 2):
                 action = np.random.choice(4, 1, p=[0.01, 0.01, 0.95, 0.03])[0]
+            
             else:
                 action = np.random.choice(4, 1, p=[0.01, 0.01, 0.03, 0.95])[0]
-                
-#         print('Action that happened: {}'.format(self.action_values(action)))
     
         old_pos = self.agent_pos.copy()
         
         if action == 0:
             self.agent_pos[1] -= 1 #down
+        
         if action == 1:
             self.agent_pos[1] += 1 #up
+        
         if action == 2:
             self.agent_pos[0] -= 1 #left
+        
         if action == 3:
             self.agent_pos[0] += 1 #right
         
         if(self.agent_pos[0] > 4 or self.agent_pos[1] > 4 or self.agent_pos[0] < 0 or self.agent_pos[1] < 0):
             current_reward += self.outbound_reward
+        
         self.agent_pos = np.clip(self.agent_pos, 0, 4)         #clip function to ensure safety of the agent
+        
         self.state = np.zeros((5,5))
         
         next_action_possible = 1                            #defines whether the next action is possible or not
@@ -99,13 +106,17 @@ class GridEnvironment(gym.Env):
             self.visited_dict['intermediate_goal1'] += 1
             
         if(self.agent_pos == self.intermediate_goal2).all():
+            
             if(self.visited_dict['intermediate_goal2'] == 0):
                 current_reward += self.reward_dict['intermediate_goal2']
+            
             self.visited_dict['intermediate_goal2'] += 1
             
         if(self.agent_pos == self.intermediate_goal3).all():
+            
             if(self.visited_dict['intermediate_goal3'] == 0):
                 current_reward += self.reward_dict['intermediate_goal3']
+            
             self.visited_dict['intermediate_goal3'] += 1
         
         if (self.agent_pos == self.final_goal_pos).all():
@@ -129,6 +140,7 @@ class GridEnvironment(gym.Env):
         
         self.reward += current_reward
         info = {'next_action_possible': next_action_possible, 'current_agent_pos': self.agent_pos}
+        self.state = np.zeros((5, 5))
         self.state[tuple(self.agent_pos)] = 1
         observation = self.state.flatten()
         return observation, current_reward, self.done, info
