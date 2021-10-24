@@ -12,13 +12,14 @@ class Net(nn.Module):
     def __init__(self, input_size=25, output_size=4,):
         super(Net, self).__init__()
 
+        # this is the basic architecture of the neural network.
         self.layer1 = nn.Linear(input_size, 50)
         self.layer2 = nn.Linear(50, 100)
         self.layer3 = nn.Linear(100, output_size)
         self.optimizer = optim.SGD(self.parameters(), lr=0.01)
         
     def forward(self, x):
-        
+        # we are using a simple Relu activation between the different layers.
         x = F.relu(self.layer1(x))
         x = F.relu(self.layer2(x))
         output = self.layer3(x)
