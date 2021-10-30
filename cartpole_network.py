@@ -9,25 +9,20 @@ import torch.nn.functional as F
 
 class Net(nn.Module):
 
-    def __init__(self, input_size, output_size):
+    def __init__(self, input_size=25, output_size=4,):
         super(Net, self).__init__()
 
         # this is the basic architecture of the neural network.
         self.layer1 = nn.Linear(input_size, 50)
-        self.layer2 = nn.Linear(50, 200)
-        self.layer3 = nn.Linear(200, 400)
-        self.layer4 = nn.Linear(400, output_size)
+        self.layer2 = nn.Linear(50, 100)
+        self.layer3 = nn.Linear(100, output_size)
         self.optimizer = optim.SGD(self.parameters(), lr=0.01)
         
     def forward(self, x):
         # we are using a simple Relu activation between the different layers.
-        # print(x.shape)
         x = F.relu(self.layer1(x))
-        # print(x.shape)
         x = F.relu(self.layer2(x))
-        x = F.relu(self.layer3(x))
-        # print(x.shape)
-        output = self.layer4(x)
+        output = self.layer3(x)
         return output
         
     def save_model(self,filename='models/temporary_model.pth'):
