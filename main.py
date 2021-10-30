@@ -18,19 +18,22 @@ from tqdm import tqdm
 from torch.autograd import Variable
 
 class Main:
-    def __init__(self):
+    def __init__(self, env_variable, env_type, input_size, output_size):
         # Here we are setting the parameters for the training and the neural networks.
         self.training_episodes = 1000
         self.epsilon_decay = 0.01
         self.epsilon = 1
         self.discount_factor = 0.9
-        self.env = GridEnvironment('deterministic')
-        self.neural_net = Net()
-        self.learning_target = Net()
+        self.env = env_variable
+        self.neural_net = Net(input_size, output_size)
+        self.learning_target = Net(input_size, output_size)
         self.learning_target.transfer_weights(self.neural_net)
         self.memory = ReplayMemory(10000)
-        self.batch_size = 40
-        self.update_time_steps = 5
+        self.batch_size = 256
+        self.update_time_steps = 10
+        self.env_type = env_type
+        self.input_size = input_size
+        self.output_size = output_size
 
     # The epsilon greedy method for selecting the actions.
     def select_action(self, observation):
@@ -46,9 +49,12 @@ class Main:
         return action
     
     def main(self):
-        replay_memory_size = [40, 100, 250, 500, 1000, 10000]
+        replay_memory_size = [10000]
 
         for size in replay_memory_size:
+            self.neural_net = Net(self.input_size, self.output_size)
+            self.target_network = Net(self.input_size, self.output_size)
+            self.target_network.transfer_weights(self.neural_net)
             self.memory = ReplayMemory(size)
             self.epsilon = 1
             count = 0
@@ -59,10 +65,12 @@ class Main:
                 # print("EPISODE {}".format(epi))
                 total_reward = 0
                 current_state = self.env.reset()
-
+                done = False
+                timestep_count = 0
+                count +=1
                 # while the episode hasnt terminated
-                while not self.env.done:
-                    count +=1
+                while not done:
+                    timestep_count += 1
                     # get the selected action from the current_state
                     action = self.select_action(current_state)
                     
@@ -82,28 +90,28 @@ class Main:
                         self.train(current_states, actions, rewards, next_states, dones)
                     
                     # transfer the weights if we cross the specfied threshold.
-                    if count%self.update_time_steps ==0:
-                        self.learning_target.transfer_weights(self.neural_net)
+                if count%self.update_time_steps ==0:
+                    self.learning_target.transfer_weights(self.neural_net)
                 
                 # decay the epsilon
                 self.epsilon = self.epsilon - (self.epsilon * self.epsilon_decay)
 
                 # store the necessary objectives.
                 total_rewards_array.append(total_reward)
-                all_time_steps.append(self.env.timestep)
+                all_time_steps.append(timestep_count)
                 epsilons.append(self.epsilon)
                 # print("Rewards for episode: {}, Timesteps: {}".format(total_reward, self.env.timestep))
             plt.figure()
             plt.plot(total_rewards_array)
-            plt.title('Total Rewards during Training in memory size {}'.format(size))
+            plt.title('{}: Total Rewards during Training in memory size {}'.format(self.env_type, size))
             plt.show()
             plt.figure()
             plt.plot(all_time_steps)
-            plt.title('Timesteps during Training in memory size {}'.format(size))
+            plt.title('{}: Timesteps during Training in memory size {}'.format(self.env_type, size))
             plt.show()
             plt.figure()
             plt.plot(epsilons)
-            plt.title('Epsilon Decay during Training in memory size {}'.format(size))
+            plt.title('{}: Epsilon Decay during Training in memory size {}'.format(self.env_type, size))
             plt.show()
 
             self.test()
@@ -138,8 +146,8 @@ class Main:
 
             # this is just a basic optimization which helps the neural network converge faster (similar to what relu and other activation functions are doing.)
             # for example clamp(min=0) = ReLU
-            for param in self.neural_net.parameters():
-                param.grad.data.clamp_(-1, 1)
+            # for param in self.neural_net.parameters():
+            #     param.grad.data.clamp_(-1, 1)
             
             self.neural_net.optimizer.step() 
 
@@ -154,23 +162,28 @@ class Main:
             observation = self.env.reset()
             total_reward = 0
             done = False
+            timestep_count = 0
             while not done:
-                
+                timestep_count += 1
                 action = self.select_action(observation)
                 observation, current_reward, done, info = self.env.step(action)
                 total_reward+=current_reward
             total_rewards_array.append(total_reward)
-            all_time_steps.append(self.env.timestep)
+            all_time_steps.append(timestep_count)
             # print("for {} iteration, the cumulative reward is {}".format(i,total_reward))
         
         plt.figure()
         plt.plot(total_rewards_array)
-        plt.title('Total Rewards during Testing')
+        plt.title('{}: Total Rewards during Testing'.format(self.env_type))
         plt.show()
         plt.figure()
         plt.plot(all_time_steps)
-        plt.title('Timesteps during Testing')
+        plt.title('{}: Timesteps during Testing'.format(self.env_type))
         plt.show()
 
-main_obj = Main()
-main_obj.main()
+# main_obj = Main()
+# main_obj.main()
+
+cartpole_obj = gym.make("CartPole-v1")
+main_obj_cartpole = Main(cartpole_obj, 'Cartpole Environment', 4, 2)
+main_obj_cartpole.main()
