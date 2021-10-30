@@ -13,21 +13,30 @@ class Net(nn.Module):
         super(Net, self).__init__()
 
         # this is the basic architecture of the neural network.
-        self.layer1 = nn.Linear(input_size, 50)
-        self.layer2 = nn.Linear(50, 200)
-        self.layer3 = nn.Linear(200, 400)
-        self.layer4 = nn.Linear(400, output_size)
-        self.optimizer = optim.SGD(self.parameters(), lr=0.01)
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.layer1 = nn.Linear(input_size, 200).to(self.device)
+        # self.bn1 = nn.BatchNorm1d(num_features=200)
+        self.layer2 = nn.Linear(200, 400).to(self.device)
+        self.layer3 = nn.Linear(400, 400).to(self.device)
+        self.layer4 = nn.Linear(400, output_size).to(self.device)
+        self.optimizer = optim.Adam(self.parameters(), lr=0.01)
+        
         
     def forward(self, x):
         # we are using a simple Relu activation between the different layers.
         # print(x.shape)
+        # print('entered forward')
+        x = x.to(self.device)
+        # print(x)
+        # x = F.relu(self.bn1(self.layer1(x)))
         x = F.relu(self.layer1(x))
-        # print(x.shape)
+        # print(x)
         x = F.relu(self.layer2(x))
+        # print(x)
         x = F.relu(self.layer3(x))
-        # print(x.shape)
+        # print(x)
         output = self.layer4(x)
+        # print(output)
         return output
         
     def save_model(self,filename='models/temporary_model.pth'):
