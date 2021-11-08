@@ -180,7 +180,7 @@ class Dqn_mountaincar:
         self.epsilon = 0
         observation = self.env.reset()
         
-        for i in range(100):
+        for i in tqdm(range(100)):
             observation = self.env.reset()
             total_reward = 0
             done = False
@@ -205,6 +205,6 @@ class Dqn_mountaincar:
         plt.title('{}: Timesteps during Testing'.format(self.env_type))
         plt.show()
 
-mountaincar_obj = gym.make("MountainCar-v0")
-main_obj_mountaincar = Dqn_mountaincar(mountaincar_obj, 'Mountain Car DQN', 2, 3)
-main_obj_mountaincar.main()
+# mountaincar_obj = gym.make("MountainCar-v0")
+# main_obj_mountaincar = Dqn_mountaincar(mountaincar_obj, 'Mountain Car DQN', 2, 3)
+# main_obj_mountaincar.main()

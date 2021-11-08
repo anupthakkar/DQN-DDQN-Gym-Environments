@@ -181,6 +181,6 @@ class Dqn_grid:
         plt.title('{}: Timesteps during Testing'.format(self.env_type))
         plt.show()
 
-grid_obj = GridEnvironment('deterministic')
-main_obj_grid = Dqn_grid(grid_obj, 'Grid Environment DQN', 25, 4)
-main_obj_grid.main()
+# grid_obj = GridEnvironment('deterministic')
+# main_obj_grid = Dqn_grid(grid_obj, 'Grid Environment DQN', 25, 4)
+# main_obj_grid.main()

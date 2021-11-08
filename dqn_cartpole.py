@@ -112,7 +112,7 @@ class Dqn_cartpole:
                 total_rewards_array.append(total_reward)
                 all_time_steps.append(timestep_count)
                 epsilons.append(self.epsilon)
-                if(np.mean(total_rewards_array[-10:]) > 475):
+                if(np.mean(total_rewards_array[-15:]) > 475):
                     break
                 # print("Rewards for episode: {}, Timesteps: {}".format(total_reward, self.env.timestep))
             # print("self.train_trig ",self.train_trig)
@@ -176,7 +176,7 @@ class Dqn_cartpole:
         self.epsilon = 0
         observation = self.env.reset()
         
-        for i in range(100):
+        for i in tqdm(range(100)):
             observation = self.env.reset()
             total_reward = 0
             done = False
@@ -201,6 +201,6 @@ class Dqn_cartpole:
         plt.title('{}: Timesteps during Testing'.format(self.env_type))
         plt.show()
 
-cartpole_obj = gym.make("CartPole-v1")
-main_obj_cartpole = Dqn_cartpole(cartpole_obj, 'Cartpole Environment', 4, 2)
-main_obj_cartpole.main()
+# cartpole_obj = gym.make("CartPole-v1")
+# main_obj_cartpole = Dqn_cartpole(cartpole_obj, 'Cartpole Environment', 4, 2)
+# main_obj_cartpole.main()
